@@ -30,13 +30,9 @@ if 'is_accepted' not in st.session_state:
 yes_button_size = 18 + (st.session_state.no_count * 12)
 
 # ฟังก์ชันคำนวณการเปลี่ยนสีพื้นหลังจาก ดำ (#000000) ไปเป็น #D4BAB0
-# โดยแบ่งเป็น 10 ระดับตามจำนวนครั้งที่กดปฏิเสธ
 def get_background_color(count):
     if count >= 9:
         return "#D4BAB0"
-    
-    # เป้าหมายสี #D4BAB0 แปลงเป็น RGB คือ (212, 186, 176)
-    # ค่อยๆ เพิ่มค่า RGB จาก 0 ไปหาเป้าหมาย
     r = int((212 / 9) * count)
     g = int((186 / 9) * count)
     b = int((176 / 9) * count)
@@ -44,7 +40,7 @@ def get_background_color(count):
 
 bg_color = get_background_color(st.session_state.no_count)
 
-# แทรก CSS เพื่อปรับแต่งหน้าตา สีพื้นหลัง และขนาดปุ่มแบบ Dynamic
+# [แก้ไขบั๊ก] ใช้ {{ }} สองชั้นสำหรับ CSS ปกติ และใช้ {ตัวแปร} สำหรับค่าที่ดึงมาจาก Python
 st.markdown(f"""
     <style>
     /* เปลี่ยนสีพื้นหลังของ App */
@@ -90,18 +86,14 @@ st.markdown(f"""
 
 # --- ส่วนของการแสดงผลบนหน้าเว็บ ---
 
-# ถ้าเขากดตกลงแล้ว 🎉
 if st.session_state.is_accepted:
-    st.markdown("<div class='question-text'>เย้! งั้นเป็นแฟนกันแล้วนะครับ รักแบมที่สุดเลยยย❤️🥰</div>", unsafe_allowed_html=True)
-    st.balloons() # เอฟเฟกต์ลูกโป่งลอยขึ้นมา
+    st.markdown("<div class='question-text'>เย้! งั้นเป็นแฟนกันแล้วนะค้าบ รักที่สุดเลยยย ❤️🥰</div>", unsafe_allowed_html=True)
+    st.balloons()
 
-# ถ้ายังไม่กดตกลง
 else:
-    # แสดงคำถาม (เปลี่ยนตามจำนวนครั้งที่กดปฏิเสธ)
     current_word_index = min(st.session_state.no_count, len(sweet_words) - 1)
     st.markdown(f"<div class='question-text'>{sweet_words[current_word_index]}</div>", unsafe_allowed_html=True)
     
-    # สร้างคอลัมน์ซ้าย-ขวา สำหรับวางปุ่มคู่กัน (เหมาะกับหน้าจอมือถือ)
     col1, col2 = st.columns(2)
     
     with col1:
@@ -111,5 +103,7 @@ else:
             
     with col2:
         if st.button("ไม่เป็นอะ ไม่เอาาา"):
+            st.session_state.no_count += 1
+            st.rerun()
             st.session_state.no_count += 1
             st.rerun()
