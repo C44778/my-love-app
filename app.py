@@ -40,8 +40,9 @@ def get_background_color(count):
 
 bg_color = get_background_color(st.session_state.no_count)
 
-# [แก้ไขบั๊ก] ใช้ {{ }} สองชั้นสำหรับ CSS ปกติ และใช้ {ตัวแปร} สำหรับค่าที่ดึงมาจาก Python
-st.markdown(f"""
+# ใช้ st.html แทน st.markdown เพื่อความเสถียรในการฉีด CSS 
+# ใช้ สัญลักษณ์ {{ }} สองชั้นครอบ CSS ปกติ เพื่อป้องกันการชนกับระบบ f-string
+st.html(f"""
     <style>
     /* เปลี่ยนสีพื้นหลังของ App */
     .stApp {{
@@ -51,38 +52,42 @@ st.markdown(f"""
     
     /* ปรับแต่งข้อความคำถามตรงกลาง */
     .question-text {{
-        font-size: 2rem;
+        font-size: 2.2rem;
         font-weight: bold;
         text-align: center;
         color: #ffffff;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
         margin-bottom: 50px;
-        padding-top: 100px;
+        padding-top: 120px;
+        line-height: 1.5;
     }}
     
-    /* ปรับแต่งปุ่ม "เป็นแน่นอน" ให้ขยายใหญ่ขึ้นได้ */
-    div.stButton > button:first-child {{
+    /* ปรับแต่งปุ่มเจาะจงด้วย Key [yes_btn] ให้ขยายใหญ่ขึ้นเรื่อยๆ */
+    div[data-testid="stBaseButton-elementHlsYes"] {{
         font-size: {yes_button_size}px !important;
-        padding: 10px 20px !important;
+        padding: 15px 25px !important;
         background-color: #ff4b4b !important;
         color: white !important;
-        border-radius: 20px !important;
+        border-radius: 30px !important;
         border: none !important;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         width: 100%;
+        box-shadow: 0px 4px 15px rgba(255, 75, 75, 0.4);
     }}
     
-    /* ปรับแต่งปุ่ม "ไม่เป็นอะ ไม่เอาาา" ให้ดูเล็กลงเรื่อยๆ */
-    div.stButton > button:last-child {{
+    /* ปรับแต่งปุ่มเจาะจงด้วย Key [no_btn] ให้คงที่คงวา */
+    div[data-testid="stBaseButton-elementHlsNo"] {{
         font-size: 14px !important;
-        background-color: #555555 !important;
-        color: #cccccc !important;
-        border-radius: 20px !important;
+        padding: 10px 15px !important;
+        background-color: #444444 !important;
+        color: #bbbbbb !important;
+        border-radius: 30px !important;
         border: none !important;
         width: 100%;
+        margin-top: 5px;
     }}
     </style>
-""", unsafe_allowed_html=True)
+""")
 
 # --- ส่วนของการแสดงผลบนหน้าเว็บ ---
 
@@ -91,19 +96,21 @@ if st.session_state.is_accepted:
     st.balloons()
 
 else:
+    # เลือกคำตามจำนวนครั้งที่กดปฏิเสธ
     current_word_index = min(st.session_state.no_count, len(sweet_words) - 1)
     st.markdown(f"<div class='question-text'>{sweet_words[current_word_index]}</div>", unsafe_allowed_html=True)
     
+    # แบ่งคอลัมน์ซ้ายขวาบนหน้าจอมือถือ
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("เป็นแน่นอน"):
+        # กำหนด key='elementHlsYes' เพื่อให้ CSS ค้นหาเจอและจัดสไตล์ได้ถูกต้อง
+        if st.button("เป็นแน่นอน", key="elementHlsYes"):
             st.session_state.is_accepted = True
             st.rerun()
             
     with col2:
-        if st.button("ไม่เป็นอะ ไม่เอาาา"):
-            st.session_state.no_count += 1
-            st.rerun()
+        # กำหนด key='elementHlsNo' เพื่อระบุตัวตนของปุ่มปฏิเสธ
+        if st.button("ไม่เป็นอะ ไม่เอาาา", key="elementHlsNo"):
             st.session_state.no_count += 1
             st.rerun()
